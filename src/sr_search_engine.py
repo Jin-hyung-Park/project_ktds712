@@ -3,9 +3,16 @@ SR 유사도 검색 엔진
 Azure AI Search의 SR 인덱스를 활용한 유사 SR 검색 전용
 """
 import re
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 from .data_loader import DataLoader
 from .config import Config
+
+try:
+    from .azure_search_client import AzureSearchClient
+    AZURE_SEARCH_AVAILABLE = True
+except ImportError:
+    AZURE_SEARCH_AVAILABLE = False
+    print("⚠️ Azure Search 클라이언트를 사용할 수 없습니다.")
 
 class SRSearchEngine:
     """SR 유사도 검색 전용 엔진"""
@@ -15,8 +22,68 @@ class SRSearchEngine:
         self.config = Config()
         self.index_name = self.config.AZURE_SEARCH_INDEX_SR
         
+        # Azure Search 클라이언트 초기화
+        self.azure_client = None
+        self.use_azure = False
+        
+        if AZURE_SEARCH_AVAILABLE and self._has_azure_config():
+            try:
+                self.azure_client = AzureSearchClient()
+                self.use_azure = True
+                print("✅ Azure AI Search 사용 가능")
+            except Exception as e:
+                print(f"⚠️ Azure Search 초기화 실패: {e}. 로컬 검색으로 폴백합니다.")
+                self.use_azure = False
+    
+    def _has_azure_config(self) -> bool:
+        """Azure Search 설정이 있는지 확인"""
+        return (self.config.AZURE_SEARCH_ENDPOINT and 
+                self.config.AZURE_SEARCH_ENDPOINT != "https://your-search-service.search.windows.net" and
+                self.config.AZURE_SEARCH_KEY and
+                self.config.AZURE_SEARCH_KEY != "your-search-key")
+        
     def search_similar(self, query_sr: Dict[str, Any], top_k: int = 5) -> List[Dict[str, Any]]:
         """유사한 SR 검색"""
+        # Azure Search 사용 가능하면 Azure Search 사용
+        if self.use_azure and self.azure_client:
+            return self._search_with_azure(query_sr, top_k)
+        else:
+            # 로컬 검색으로 폴백
+            return self._search_local(query_sr, top_k)
+    
+    def _search_with_azure(self, query_sr: Dict[str, Any], top_k: int = 5) -> List[Dict[str, Any]]:
+        """Azure AI Search를 사용한 검색"""
+        try:
+            # 쿼리 텍스트 생성
+            query_text = self._build_sr_query(query_sr)
+            
+            # 필터 설정
+            filters = {
+                'exclude_id': query_sr.get('id')
+            }
+            
+            # Azure Search로 검색
+            results = self.azure_client.search_similar_srs(
+                query_text=query_text,
+                top_k=top_k,
+                filters=filters
+            )
+            
+            # 결과 포맷 통일
+            for result in results:
+                if 'match_factors' not in result:
+                    result['match_factors'] = self._analyze_match_factors_from_result(
+                        query_sr, result['sr']
+                    )
+            
+            return results
+            
+        except Exception as e:
+            print(f"⚠️ Azure Search 검색 실패: {e}. 로컬 검색으로 폴백합니다.")
+            return self._search_local(query_sr, top_k)
+    
+    def _search_local(self, query_sr: Dict[str, Any], top_k: int = 5) -> List[Dict[str, Any]]:
+        """로컬 검색 (폴백)"""
         all_srs = self.data_loader.load_sr_data()
         
         # 쿼리 텍스트 생성 (SR 특화)
@@ -140,4 +207,29 @@ class SRSearchEngine:
             'component_overlap': len(set(sr1.get('affected_components', []))
                                    .intersection(set(sr2.get('affected_components', []))))
         }
+    
+    def _analyze_match_factors_from_result(self, query_sr: Dict[str, Any], result_sr: Dict[str, Any]) -> Dict[str, float]:
+        """Azure Search 결과에서 매치 요소 분석"""
+        return self._analyze_match_factors(query_sr, result_sr)
+    
+    def initialize_index(self) -> bool:
+        """인덱스 초기화 및 데이터 업로드"""
+        if not self.use_azure or not self.azure_client:
+            print("⚠️ Azure Search가 사용 가능하지 않습니다.")
+            return False
+        
+        try:
+            # 인덱스 생성
+            if not self.azure_client.create_sr_index(self.index_name):
+                return False
+            
+            # SR 데이터 로드
+            srs = self.data_loader.load_sr_data()
+            
+            # 데이터 인덱싱
+            return self.azure_client.index_sr_documents(srs, self.index_name)
+            
+        except Exception as e:
+            print(f"❌ 인덱스 초기화 실패: {e}")
+            return False
 
