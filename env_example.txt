@@ -1,0 +1,8 @@
+# Azure AI Search 설정
+AZURE_SEARCH_ENDPOINT=https://your-search-service.search.windows.net
+AZURE_SEARCH_KEY=your-search-key
+
+# Azure OpenAI 설정
+AZURE_OPENAI_ENDPOINT=https://your-openai-service.openai.azure.com
+AZURE_OPENAI_KEY=your-openai-key
+AZURE_OPENAI_DEPLOYMENT=gpt-4

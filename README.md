@@ -21,8 +21,8 @@ SR 문서와 장애 보고서를 결합하여, 과거 장애와의 연관도를 
 
 | 기능 | 설명 | 사용 기술 |
 |------|------|-----------|
-| 🔍 SR 유사도 분석 | 신규 SR과 과거 SR 간의 의미 유사도 분석 | Azure AI Search |
-| ⚙️ 장애연관도 평가 | SR과 장애 보고서 간의 연관도 분석 | Azure OpenAI, Embedding |
+| 🔍 SR 유사도 분석 | 신규 SR과 과거 SR 간의 의미 유사도 분석 | Azure AI Search(vector) |
+| ⚙️ 장애연관도 평가 | SR과 장애 보고서 간의 연관도 분석 | Azure AI Search(semantic) |
 | 📊 개선된 리스크 스코어링 | FMEA 기반 다차원 리스크 평가 | Python, LangChain |
 | 🕒 시간 민감도 분석 | 최근 장애일수록 높은 리스크 가중치 | Python |
 | 🏢 시스템 중요도 평가 | 비즈니스 중요도 기반 리스크 조정 | Python |
