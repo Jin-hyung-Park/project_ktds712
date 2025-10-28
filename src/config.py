@@ -5,7 +5,10 @@ import os
 from dotenv import load_dotenv
 
 # 환경 변수 로드
-load_dotenv()
+# 현재 디렉토리와 상위 디렉토리에서 .env 파일 찾기
+config_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+load_dotenv(os.path.join(config_dir, '.env'))
+load_dotenv()  # 현재 작업 디렉토리에서도 로드
 
 class Config:
     """애플리케이션 설정"""

@@ -117,6 +117,53 @@ SR 문서와 장애 보고서를 결합하여, 과거 장애와의 연관도를 
 
 ---
 
+## ⚙️ 환경 설정
+
+### **필수 요구사항**
+- Python 3.8 이상
+- Azure AI Search 리소스 (선택사항 - 시뮬레이션 모드 지원)
+- Azure OpenAI 리소스 (선택사항 - 규칙 기반 평가로 폴백)
+
+### **설치 방법**
+
+1. **의존성 패키지 설치**
+```bash
+pip install -r requirements.txt
+```
+
+2. **환경 변수 설정**
+
+프로젝트 루트 디렉토리 또는 `project_ktds712` 디렉토리에 `.env` 파일을 생성하고 다음 내용을 작성하세요:
+
+```bash
+# Azure AI Search 설정
+AZURE_SEARCH_ENDPOINT=https://your-search-service.search.windows.net
+AZURE_SEARCH_KEY=your-search-key
+
+# Azure OpenAI 설정
+AZURE_OPENAI_ENDPOINT=https://your-openai-service.openai.azure.com
+AZURE_OPENAI_KEY=your-openai-key
+AZURE_OPENAI_DEPLOYMENT=gpt-4
+```
+
+`env_example.txt` 파일을 참고하여 설정할 수 있습니다.
+
+3. **환경 변수 확인**
+
+```bash
+python3 check_env.py
+```
+
+이 스크립트는 환경 변수 설정 상태를 확인하고 필요한 설정이 누락되었는지 알려줍니다.
+
+### **설정 없이 실행**
+
+Azure 리소스가 없는 경우에도 실행 가능합니다:
+- **AI Search**: 로컬 텍스트 유사도 검색으로 자동 폴백
+- **OpenAI**: 규칙 기반 리스크 평가로 자동 폴백
+
+---
+
 ## 🧭 개발 일정 (MVP 기준)
 
 | Day | 주요 목표 | 세부 작업 |
