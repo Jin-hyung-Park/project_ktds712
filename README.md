@@ -121,14 +121,23 @@ project_ktds712/
 │   ├── incident_rag.py             # 🚨 장애 검색 RAG 모듈
 │   ├── config.py                   # ⚙️ 설정 관리
 │   └── azure_search_client.py      # 🔗 Azure Search 클라이언트
-├── reference/                     # 📚 참고용 Jupyter 노트북
+├── pdfs/                         # 📄 PDF 데이터 파일들
+│   ├── incident/                 # 🚨 장애 PDF (20개)
+│   └── sr/                       # 📋 SR PDF (16개)
+├── guideline/                    # 📚 가이드라인 문서들
+│   ├── AI_RISK_EVALUATION.md
+│   ├── INCIDENT_RAG_README.md
+│   ├── README_STREAMLIT.md
+│   ├── SEARCH_ENGINE_IMPROVEMENT.md
+│   └── deployment_guide.md
+├── reference/                    # 📖 참고용 Jupyter 노트북들
 │   ├── 01.azure-search-quickstart.ipynb
 │   ├── 02.Quickstart-rag.ipynb
 │   └── 04.vector-search-quickstart.ipynb
-├── requirements.txt               # 📦 Python 의존성
-├── sample_incident_data.json      # 📊 샘플 장애 데이터
-├── sample_sr_data.json           # 📋 샘플 SR 데이터
-└── README_STREAMLIT.md           # 📖 Streamlit 앱 사용법
+├── sample_incident_data.json     # 📊 샘플 장애 데이터
+├── sample_sr_data.json          # 📋 샘플 SR 데이터
+├── requirements.txt              # 📦 Python 의존성
+└── README.md                     # 📖 프로젝트 문서
 ```
 
 ---
@@ -168,6 +177,18 @@ project_ktds712/
 
 ---
 
+## 📊 데이터 소스
+
+### **PDF 데이터 (36개 파일)**
+- **장애 PDF**: `pdfs/incident/` (20개) - 실제 장애 보고서
+- **SR PDF**: `pdfs/sr/` (16개) - 실제 Service Request 문서
+
+### **샘플 JSON 데이터**
+- **장애 데이터**: `sample_incident_data.json` - 구조화된 장애 정보
+- **SR 데이터**: `sample_sr_data.json` - 구조화된 SR 정보
+
+---
+
 ## 🔧 설정 없이 실행
 
 Azure 리소스가 없는 경우에도 실행 가능합니다:
@@ -184,6 +205,22 @@ Azure 리소스가 없는 경우에도 실행 가능합니다:
 | **의사결정 지원** | 경험 기반 | 데이터 기반 객관적 평가 | 📊 **객관적 우선순위** |
 | **리스크 관리** | 사후 대응 | 예측형 리스크 식별 | ⚡ **조기 대응 가능** |
 | **자동화** | 수동 검토 | AI 기반 자동 분석 | ⏱️ **업무 효율 50% 향상** |
+
+---
+
+## 📚 참고 자료
+
+### **가이드라인 문서**
+- [AI 리스크 평가 가이드](guideline/AI_RISK_EVALUATION.md)
+- [장애 RAG 시스템 문서](guideline/INCIDENT_RAG_README.md)
+- [Streamlit 앱 사용법](guideline/README_STREAMLIT.md)
+- [검색 엔진 개선 문서](guideline/SEARCH_ENGINE_IMPROVEMENT.md)
+- [배포 가이드](guideline/deployment_guide.md)
+
+### **참고용 노트북**
+- [Azure Search 빠른 시작](reference/01.azure-search-quickstart.ipynb)
+- [RAG 빠른 시작](reference/02.Quickstart-rag.ipynb)
+- [벡터 검색 빠른 시작](reference/04.vector-search-quickstart.ipynb)
 
 ---
 
@@ -206,15 +243,6 @@ docker build -t sr-impact-navigator .
 # 컨테이너 실행
 docker run -p 8501:8501 sr-impact-navigator
 ```
-
----
-
-## 📚 참고 자료
-
-- [Streamlit 앱 사용법](README_STREAMLIT.md)
-- [장애 RAG 시스템 문서](INCIDENT_RAG_README.md)
-- [배포 가이드](deployment_guide.md)
-- [참고용 Jupyter 노트북](reference/)
 
 ---
 
