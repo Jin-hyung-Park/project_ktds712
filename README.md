@@ -1,88 +1,146 @@
-# SR Impact Navigator - 개발 리스크 분석 시스템
 
-**FMEA 기반 개발 과제 위험도 분석 및 가이드 제공 AI 시스템**
+# SR Impact Navigator+  
+**SR 변경 영향도 및 장애연관 리스크 기반 과제 평가 AI**
 
 ---
 
 ## 🚀 프로젝트 개요
-
-SR Impact Navigator는 개발 요구사항을 입력받아 연관 SR과 유사 장애를 검색하고, FMEA(Failure Mode and Effects Analysis) 기반으로 체계적인 위험도 분석을 수행하는 Streamlit 기반 웹 애플리케이션입니다.
-
----
-
-## 🎯 주요 기능
-
-### 📝 **개발 요구사항 입력**
-- 개발 과제 제목 및 상세 내용 입력
-- 직관적인 웹 인터페이스 제공
-
-### 🔍 **지능형 검색 및 분석**
-- **연관 SR 검색**: Azure AI Search를 통한 관련 Service Request 검색
-- **유사 장애 검색**: 과거 발생한 유사한 장애 사례 검색
-- **FMEA 분석**: OpenAI를 통한 체계적인 위험도 분석
-
-### 📊 **종합 리스크 분석 결과**
-- **위험도 요약**: 전체 위험 요소, 고위험/중위험/저위험 요소 개수
-- **참조 정보**: 연관 SR과 장애 정보의 요약 표시
-- **위험 요소 상세**: 각 위험 요소의 원인, 영향, RPN, 완화 방안
-- **개발 가이드라인**: 개발 시 고려사항 제공
-- **모니터링 권장사항**: 운영 시 모니터링 포인트 제시
+SR 문서와 장애 보고서를 결합하여, 과거 장애와의 연관도를 분석하고 리스크가 높은 개발요구사항을 자동 식별하는 Azure AI 기반 시스템입니다.
 
 ---
 
-## 🏗️ 시스템 아키텍처
+## 🎯 목표
+- 신규 SR의 **영향도 예측**
+- 과거 장애 보고서 기반 **리스크 평가**
+- 유사 SR 및 장애사례를 기반으로 **개발/검증 가이드 제공**
+- 위험도가 높은 **주요 과제 자동 선정**
+
+---
+
+## 🧩 주요 기능
+
+| 기능 | 설명 | 사용 기술 |
+|------|------|-----------|
+| 🔍 SR 유사도 분석 | 신규 SR과 과거 SR 간의 의미 유사도 분석 | Azure AI Search(vector) |
+| ⚙️ 장애연관도 평가 | SR과 장애 보고서 간의 연관도 분석 | Azure AI Search(semantic) |
+| 📊 개선된 리스크 스코어링 | FMEA 기반 다차원 리스크 평가 | Python, LangChain |
+| 🕒 시간 민감도 분석 | 최근 장애일수록 높은 리스크 가중치 | Python |
+| 🏢 시스템 중요도 평가 | 비즈니스 중요도 기반 리스크 조정 | Python |
+| 💡 개발/검증 가이드 | 유사 SR의 구현방안 및 검증방안 요약 제공 | Azure OpenAI |
+| 🧾 주요 과제 추천 | 리스크가 높은 SR을 자동 정렬 및 표시 | Streamlit Dashboard |
+
+---
+
+## 🏗️ 아키텍처 구성
 
 ```text
-[사용자 입력: 개발 과제 설명]
+[사용자 입력: 신규 SR 문서 또는 요약]
         ↓
-[Streamlit UI - app_streamlit.py]
+[Azure Document Intelligence]
         ↓
-[통합 리스크 분석기 - integrated_risk_analyzer.py]
-  1️⃣ 연관 SR 검색 (search_rag.py)
-  2️⃣ 유사 장애 검색 (incident_rag.py)
-  3️⃣ FMEA 기반 위험도 분석 (OpenAI GPT-4)
+[LangChain 파이프라인]
+  1️⃣ SR → 유사 SR 검색 (AI Search)
+  2️⃣ SR → 장애보고서 검색 (AI Search)
+  3️⃣ 시스템 중요도 + 시간 민감도 분석
+  4️⃣ FMEA 기반 다차원 리스크 계산
         ↓
-[분석 결과 시각화]
-  → 위험도 요약 + 상세 분석 + 가이드라인 제공
+[Azure OpenAI GPT]
+  → 개발/검증 가이드 + 상세 리스크 리포트 생성
+        ↓
+[Streamlit UI Dashboard]
+  → 리스크 등급별 시각화 + 우선순위 추천
 ```
 
 ---
 
-## 🧮 FMEA 기반 위험도 분석
+## 🧮 개선된 리스크 계산 로직
 
-### **RPN (Risk Priority Number) 계산**
-- **발생 가능성 (Occurrence)**: 1-10점 (발생 빈도)
-- **심각도 (Severity)**: 1-10점 (영향 정도)  
-- **탐지 가능성 (Detection)**: 1-10점 (사전 탐지 가능성)
-- **RPN = 발생 가능성 × 심각도 × 탐지 가능성**
+### **FMEA 기반 다차원 리스크 평가**
 
-### **위험도 등급 분류**
+**기본 리스크 요소 (각 0-1 정규화)**
+- SR 유사도 (25%)
+- 장애 연관도 (25%)  
+- 시스템 중요도 (25%)
+- 시간 민감도 (15%)
+- SR 복잡도 (10%)
 
-| RPN 범위 | 위험도 | 색상 | 조치 |
-|----------|--------|------|------|
-| 200+ | 🔴 High | 빨강 | 즉시 검토 필요 |
-| 100-199 | 🟡 Medium | 노랑 | 우선 검토 |
-| 50-99 | 🟢 Low | 초록 | 일반 검토 |
-| 50 미만 | ⚪ Minimal | 회색 | 모니터링 |
+**시간 가중치**: 최근 장애일수록 높은 영향
+**최종 리스크 스코어**: 기본 리스크 × 시간 가중치 × 심각도 배수
+
+### **리스크 요소별 가중치**
+
+| 요소 | 가중치 | 설명 | 점수 범위 |
+|------|--------|------|-----------|
+| **SR 유사도** | 25% | 과거 유사 SR과의 의미적 유사성 | 0-1 |
+| **장애 연관도** | 25% | 관련 장애 보고서와의 연관성 | 0-1 |
+| **시스템 중요도** | 25% | 비즈니스 중요도 (1-5등급) | 0-1 |
+| **시간 민감도** | 15% | 최근 장애일수록 높은 영향 | 0-1 |
+| **SR 복잡도** | 10% | 구현 복잡도에 따른 리스크 | 0-1 |
+
+### **리스크 등급 분류**
+
+| 리스크 점수 | 등급 | 색상 | 조치 |
+|-------------|------|------|------|
+| 0.8 이상 | 🔴 Critical | 빨강 | 즉시 검토 필요 |
+| 0.6-0.8 | 🟠 High | 주황 | 우선 검토 |
+| 0.4-0.6 | 🟡 Medium | 노랑 | 일반 검토 |
+| 0.2-0.4 | 🟢 Low | 초록 | 모니터링 |
+| 0.2 미만 | ⚪ Minimal | 회색 | 참고용 |
 
 ---
 
-## 🚀 빠른 시작
+## 🗂️ 장애보고서 인덱스 예시
 
-### **1. 환경 설정**
+| 필드 | 설명 |
+|------|------|
+| Fault_ID | 장애 ID |
+| Title | 장애 제목 |
+| Description | 장애 요약 |
+| Impact_System | 영향 시스템 |
+| Root_Cause | 근본 원인 |
+| Resolution | 조치 내용 |
+| Severity | 장애 등급 |
+| Date | 발생 일자 |
 
+---
+
+## 💬 Streamlit 예시 화면
+
+**입력**  
+- SR 제목, 요약, 문서 업로드
+
+**출력**  
+- 📊 영향 시스템 예측  
+- 🔗 연관 SR 및 장애 목록  
+- ⚠️ 리스크 점수 및 설명  
+- 💡 추천 개발/검증 가이드  
+
+---
+
+## ⚙️ 환경 설정
+
+### **필수 요구사항**
+- Python 3.11 이상 (Python 3.8은 지원되지 않음)
+- Azure AI Search 리소스 (선택사항 - 시뮬레이션 모드 지원)
+- Azure OpenAI 리소스 (선택사항 - 규칙 기반 평가로 폴백)
+
+### **설치 방법**
+
+1. **의존성 패키지 설치**
+
+Python 3.11을 사용하여 설치하세요:
 ```bash
-# 저장소 클론
-git clone https://github.com/Jin-hyung-Park/project_ktds712.git
-cd project_ktds712
+python3.11 -m pip install -r requirements.txt
+```
 
-# 의존성 설치
+또는 Python 3.11이 기본 python으로 설정되어 있다면:
+```bash
 pip install -r requirements.txt
 ```
 
-### **2. 환경 변수 설정**
+2. **환경 변수 설정**
 
-`.env` 파일을 생성하고 다음 내용을 입력하세요:
+프로젝트 루트 디렉토리 또는 `project_ktds712` 디렉토리에 `.env` 파일을 생성하고 다음 내용을 작성하세요:
 
 ```bash
 # Azure AI Search 설정
@@ -93,103 +151,24 @@ AZURE_SEARCH_KEY=your-search-key
 AZURE_OPENAI_ENDPOINT=https://your-openai-service.openai.azure.com
 AZURE_OPENAI_KEY=your-openai-key
 AZURE_OPENAI_DEPLOYMENT=gpt-4
-
-# Azure Embedding 설정 (선택사항)
-AZURE_EMBEDDING_OPENAI_ENDPOINT=https://your-embedding-service.openai.azure.com
-AZURE_EMBEDDING_OPENAI_KEY=your-embedding-key
-AZURE_EMBEDDING_OPENAI_DEPLOYMENT=text-embedding-ada-002
 ```
 
-### **3. 애플리케이션 실행**
+`env_example.txt` 파일을 참고하여 설정할 수 있습니다.
+
+3. **환경 변수 확인**
 
 ```bash
-streamlit run app_streamlit.py
+python3.11 check_env.py
 ```
 
-웹 브라우저에서 `http://localhost:8501`로 접속하세요.
-
----
-
-## 📁 프로젝트 구조
-
-```
-project_ktds712/
-├── app_streamlit.py              # 🎯 메인 Streamlit 애플리케이션
-├── src/
-│   ├── integrated_risk_analyzer.py  # 🔧 통합 리스크 분석기
-│   ├── search_rag.py               # 🔍 SR 검색 RAG 모듈
-│   ├── incident_rag.py             # 🚨 장애 검색 RAG 모듈
-│   ├── config.py                   # ⚙️ 설정 관리
-│   └── azure_search_client.py      # 🔗 Azure Search 클라이언트
-├── pdfs/                         # 📄 PDF 데이터 파일들
-│   ├── incident/                 # 🚨 장애 PDF (20개)
-│   └── sr/                       # 📋 SR PDF (16개)
-├── guideline/                    # 📚 가이드라인 문서들
-│   ├── AI_RISK_EVALUATION.md
-│   ├── INCIDENT_RAG_README.md
-│   ├── README_STREAMLIT.md
-│   ├── SEARCH_ENGINE_IMPROVEMENT.md
-│   └── deployment_guide.md
-├── reference/                    # 📖 참고용 Jupyter 노트북들
-│   ├── 01.azure-search-quickstart.ipynb
-│   ├── 02.Quickstart-rag.ipynb
-│   └── 04.vector-search-quickstart.ipynb
-├── sample_incident_data.json     # 📊 샘플 장애 데이터
-├── sample_sr_data.json          # 📋 샘플 SR 데이터
-├── requirements.txt              # 📦 Python 의존성
-└── README.md                     # 📖 프로젝트 문서
+또는:
+```bash
+python check_env.py
 ```
 
----
+이 스크립트는 환경 변수 설정 상태를 확인하고 필요한 설정이 누락되었는지 알려줍니다.
 
-## 💡 사용법
-
-### **1. 개발 요구사항 입력**
-- **제목**: 개발 과제의 간단하고 명확한 제목 입력
-- **상세 내용**: 개발하고자 하는 기능의 구체적인 내용 입력
-
-### **2. 분석 설정 조정**
-- **연관 SR 검색 수**: 검색할 연관 SR의 최대 개수 (1-10)
-- **유사 장애 검색 수**: 검색할 유사 장애의 최대 개수 (1-10)
-
-### **3. 리스크 분석 실행**
-- "🔍 리스크 분석 시작" 버튼 클릭
-- AI가 연관 SR과 장애를 검색하고 FMEA 분석 수행
-
-### **4. 결과 확인**
-- **위험도 요약**: 전체 위험 요소 개수 및 위험도 점수
-- **참조 정보**: 연관 SR과 장애 정보 요약
-- **위험 요소 상세**: 각 위험 요소의 원인, 영향, RPN, 완화 방안
-- **개발 가이드라인**: 개발 시 고려사항
-- **모니터링 권장사항**: 운영 시 모니터링 포인트
-
----
-
-## 🛠️ 기술 스택
-
-| 기술 | 용도 | 버전 |
-|------|------|------|
-| **Streamlit** | 웹 UI 프레임워크 | 1.28.0+ |
-| **Azure AI Search** | 벡터 검색 및 의미 검색 | 11.4.0+ |
-| **Azure OpenAI** | GPT-4 기반 FMEA 분석 | 1.0.0+ |
-| **LangChain** | RAG 파이프라인 | 0.1.0+ |
-| **Python** | 백엔드 언어 | 3.11+ |
-
----
-
-## 📊 데이터 소스
-
-### **PDF 데이터 (36개 파일)**
-- **장애 PDF**: `pdfs/incident/` (20개) - 실제 장애 보고서
-- **SR PDF**: `pdfs/sr/` (16개) - 실제 Service Request 문서
-
-### **샘플 JSON 데이터**
-- **장애 데이터**: `sample_incident_data.json` - 구조화된 장애 정보
-- **SR 데이터**: `sample_sr_data.json` - 구조화된 SR 정보
-
----
-
-## 🔧 설정 없이 실행
+### **설정 없이 실행**
 
 Azure 리소스가 없는 경우에도 실행 가능합니다:
 - **AI Search**: 로컬 텍스트 유사도 검색으로 자동 폴백
@@ -197,75 +176,38 @@ Azure 리소스가 없는 경우에도 실행 가능합니다:
 
 ---
 
+## 🧭 개발 일정 (MVP 기준)
+
+| Day | 주요 목표 | 세부 작업 |
+|-----|------------|-----------|
+| **Day 1** | 핵심 로직 구현 | • Azure AI Search 설정 + 샘플 데이터<br>• SR 유사도 분석 함수<br>• 개선된 리스크 스코어링 로직 |
+| **Day 2** | UI 및 통합 | • Streamlit UI 구성<br>• 리스크 점수 시각화<br>• 전체 파이프라인 통합 테스트 |
+| **Day 3** | 발표 및 시연 | • 데모 시나리오 준비<br>• 개선된 방법론 설명<br>• 향후 확장 방안 제시 |
+
+---
+
 ## 📈 기대 효과
 
 | 항목 | 기존 방식 | 개선된 방식 | 효과 |
 |------|-----------|-------------|------|
-| **리스크 정확도** | 주관적 판단 | FMEA 기반 과학적 분석 | 🎯 **정확도 30% 향상** |
-| **의사결정 지원** | 경험 기반 | 데이터 기반 객관적 평가 | 📊 **객관적 우선순위** |
+| **리스크 정확도** | 단순 가중치 합산 | FMEA 기반 다차원 평가 | 🎯 **정확도 30% 향상** |
+| **의사결정 지원** | 주관적 판단 | 과학적 근거 기반 | 📊 **객관적 우선순위** |
 | **리스크 관리** | 사후 대응 | 예측형 리스크 식별 | ⚡ **조기 대응 가능** |
-| **자동화** | 수동 검토 | AI 기반 자동 분석 | ⏱️ **업무 효율 50% 향상** |
+| **품질 확보** | 개별적 접근 | 통합적 품질 관리 | 🛡️ **재발 방지 효과** |
+| **자동화** | 수동 검토 | AI 기반 자동 평가 | ⏱️ **업무 효율 50% 향상** |
 
 ---
 
-## 📚 참고 자료
+## ✅ 요약
 
-### **가이드라인 문서**
-- [AI 리스크 평가 가이드](guideline/AI_RISK_EVALUATION.md)
-- [장애 RAG 시스템 문서](guideline/INCIDENT_RAG_README.md)
-- [Streamlit 앱 사용법](guideline/README_STREAMLIT.md)
-- [검색 엔진 개선 문서](guideline/SEARCH_ENGINE_IMPROVEMENT.md)
-- [배포 가이드](guideline/deployment_guide.md)
-
-### **참고용 노트북**
-- [Azure Search 빠른 시작](reference/01.azure-search-quickstart.ipynb)
-- [RAG 빠른 시작](reference/02.Quickstart-rag.ipynb)
-- [벡터 검색 빠른 시작](reference/04.vector-search-quickstart.ipynb)
+| 구분 | 내용 |
+|------|------|
+| **프로젝트명** | **SR Impact Navigator+** |
+| **핵심 기능** | SR 영향도 예측 + FMEA 기반 리스크 평가 + 과제 추천 |
+| **Azure 기술** | OpenAI, AI Search, Document Intelligence, Streamlit, LangChain |
+| **차별 포인트** | 🎯 **과학적 근거 기반 리스크 평가** + 예측형 RAG |
+| **개발 일정** | 2일 개발 + 1일 발표 (MVP 검증) |
+| **기대 효과** | 리스크 정확도 30% 향상 + 업무 효율 50% 향상 |
+| **확장 방향** | 조직 내 개발 과제 선정 및 품질관리 자동화 |
 
 ---
-
-## 🚀 배포
-
-### **Azure App Service 배포**
-
-```bash
-# 배포 스크립트 실행
-chmod +x deploy.sh
-./deploy.sh
-```
-
-### **로컬 Docker 실행**
-
-```bash
-# Docker 이미지 빌드
-docker build -t sr-impact-navigator .
-
-# 컨테이너 실행
-docker run -p 8501:8501 sr-impact-navigator
-```
-
----
-
-## 🤝 기여하기
-
-1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the Branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
----
-
-## 📄 라이선스
-
-이 프로젝트는 MIT 라이선스 하에 배포됩니다. 자세한 내용은 `LICENSE` 파일을 참조하세요.
-
----
-
-## 📞 문의
-
-프로젝트에 대한 문의사항이 있으시면 이슈를 생성해주세요.
-
----
-
-**SR Impact Navigator** - 개발 리스크를 사전에 예측하고 관리하는 AI 기반 솔루션 🚀

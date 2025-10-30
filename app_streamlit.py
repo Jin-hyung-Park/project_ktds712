@@ -128,9 +128,9 @@ def main():
         with col1:
             st.markdown("### 목적")
             title = st.text_input(
-                "개발요청 목적",
+                "개발 요청 목적",
                 placeholder="예: 가입일 기준 월할 계산 기능 개발",
-                help="분석할 개발 과제의 제목을 입력하세요"
+                help="분석할 개발 과제의 목적을 입력하세요"
             )
         
         with col2:
