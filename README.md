@@ -120,13 +120,20 @@ SR 문서와 장애 보고서를 결합하여, 과거 장애와의 연관도를 
 ## ⚙️ 환경 설정
 
 ### **필수 요구사항**
-- Python 3.8 이상
+- Python 3.11 이상 (Python 3.8은 지원되지 않음)
 - Azure AI Search 리소스 (선택사항 - 시뮬레이션 모드 지원)
 - Azure OpenAI 리소스 (선택사항 - 규칙 기반 평가로 폴백)
 
 ### **설치 방법**
 
 1. **의존성 패키지 설치**
+
+Python 3.11을 사용하여 설치하세요:
+```bash
+python3.11 -m pip install -r requirements.txt
+```
+
+또는 Python 3.11이 기본 python으로 설정되어 있다면:
 ```bash
 pip install -r requirements.txt
 ```
@@ -151,7 +158,12 @@ AZURE_OPENAI_DEPLOYMENT=gpt-4
 3. **환경 변수 확인**
 
 ```bash
-python3 check_env.py
+python3.11 check_env.py
+```
+
+또는:
+```bash
+python check_env.py
 ```
 
 이 스크립트는 환경 변수 설정 상태를 확인하고 필요한 설정이 누락되었는지 알려줍니다.

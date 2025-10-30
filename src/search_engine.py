@@ -21,9 +21,15 @@ class SearchEngine:
         """유사한 SR 검색 (SR 전용 검색 엔진 사용)"""
         return self.sr_searcher.search_similar(query_sr, top_k)
     
-    def search_related_incidents(self, query_sr: Dict[str, Any], top_k: int = 5) -> List[Dict[str, Any]]:
-        """관련 장애 검색 (장애 전용 검색 엔진 사용)"""
-        return self.incident_searcher.search_related(query_sr, top_k)
+    def search_related_incidents(self, query_sr: Dict[str, Any], top_k: int = 5, use_semantic: bool = True) -> List[Dict[str, Any]]:
+        """관련 장애 검색 (장애 전용 검색 엔진 사용, 노트북 스타일)
+        
+        Args:
+            query_sr: 검색할 SR 객체
+            top_k: 반환할 최대 결과 수
+            use_semantic: True면 semantic 검색 사용 (READMe의 semantic 방식), False면 simple 검색
+        """
+        return self.incident_searcher.search_related(query_sr, top_k, use_semantic)
     
     def get_search_summary(self, query_sr: Dict[str, Any]) -> Dict[str, Any]:
         """검색 결과 요약"""

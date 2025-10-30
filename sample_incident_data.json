@@ -328,5 +328,120 @@
     ],
     "related_components": ["백업서버", "요금DB", "백업스크립트", "저장소"],
     "business_impact": "요금 데이터 손실 위험, 비즈니스 연속성 위협"
+  },
+  {
+    "id": "INC-2024-016",
+    "title": "고객 정보 조회 시스템 장애",
+    "description": "고객 정보를 조회하는 시스템이 다운되어 고객 서비스 업무가 중단되었습니다. 특히 고객 상담 시 필요한 정보를 확인할 수 없는 상황입니다.",
+    "system": "고객관리시스템",
+    "severity": "Critical",
+    "status": "Resolved",
+    "reported_date": "2024-03-08",
+    "resolved_date": "2024-03-08",
+    "duration_minutes": 150,
+    "affected_users": 5000,
+    "root_cause": "고객 DB 서버 하드웨어 장애 및 백업 서버 전환 실패",
+    "resolution": "백업 서버 수동 전환 및 DB 서버 교체",
+    "impact": "고객 상담 업무 중단, 고객 불만 급증",
+    "prevention_measures": [
+      "고객 DB 서버 이중화",
+      "자동 페일오버 시스템 구축",
+      "정기적인 백업 서버 점검",
+      "모니터링 시스템 강화"
+    ],
+    "related_components": ["고객DB", "백업서버", "API서버", "상담시스템"],
+    "business_impact": "고객 서비스 중단으로 인한 고객 불만 2000건, 매출 영향 5000만원"
+  },
+  {
+    "id": "INC-2024-017",
+    "title": "주문 처리 지연",
+    "description": "주문 처리 시 응답 시간이 현저히 늘어나 일부 주문이 제대로 처리되지 않는 문제가 발생했습니다. 특히 피크 시간대에 심각한 지연이 발생했습니다.",
+    "system": "주문처리시스템",
+    "severity": "High",
+    "status": "Resolved",
+    "reported_date": "2024-03-18",
+    "resolved_date": "2024-03-19",
+    "duration_minutes": 300,
+    "affected_users": 8000,
+    "root_cause": "주문 처리 서버 리소스 부족 및 데이터베이스 락 경합",
+    "resolution": "서버 리소스 확장 및 데이터베이스 쿼리 최적화",
+    "impact": "주문 처리 지연으로 인한 주문 실패 및 고객 불만",
+    "prevention_measures": [
+      "주문 처리 서버 자동 스케일링",
+      "데이터베이스 인덱스 최적화",
+      "로드 밸런싱 개선",
+      "성능 모니터링 강화"
+    ],
+    "related_components": ["주문엔진", "주문DB", "로드밸런서", "API서버"],
+    "business_impact": "주문 실패 1000건, 매출 손실 1억원, 고객 불만 3000건"
+  },
+  {
+    "id": "INC-2024-018",
+    "title": "재고 정보 불일치",
+    "description": "재고 정보가 실제 재고와 일치하지 않아 주문 시 재고 부족으로 주문이 취소되는 문제가 발생했습니다. 특히 인기 상품에서 빈번하게 발생했습니다.",
+    "system": "재고관리시스템",
+    "severity": "High",
+    "status": "Resolved",
+    "reported_date": "2024-03-25",
+    "resolved_date": "2024-03-26",
+    "duration_minutes": 240,
+    "affected_users": 3000,
+    "root_cause": "재고 동기화 시스템 오류 및 물리 재고와 시스템 재고 불일치",
+    "resolution": "재고 동기화 시스템 수정 및 물리 재고 재조사",
+    "impact": "주문 취소로 인한 고객 불만 및 매출 손실",
+    "prevention_measures": [
+      "재고 동기화 모니터링 강화",
+      "정기적인 물리 재고 조사",
+      "재고 차이 알림 시스템",
+      "동기화 로직 개선"
+    ],
+    "related_components": ["재고DB", "동기화시스템", "주문시스템", "매장시스템"],
+    "business_impact": "주문 취소 500건, 매출 손실 3000만원, 고객 불만 1000건"
+  },
+  {
+    "id": "INC-2024-019",
+    "title": "결제 시스템 보안 오류",
+    "description": "결제 처리 시 보안 인증이 실패하여 결제가 되지 않는 문제가 발생했습니다. 특히 신용카드 결제에서 빈번하게 발생했습니다.",
+    "system": "결제시스템",
+    "severity": "Critical",
+    "status": "Resolved",
+    "reported_date": "2024-03-28",
+    "resolved_date": "2024-03-28",
+    "duration_minutes": 120,
+    "affected_users": 10000,
+    "root_cause": "결제 인증서 만료 및 보안 인증 로직 오류",
+    "resolution": "인증서 갱신 및 보안 인증 로직 수정",
+    "impact": "결제 실패로 인한 주문 실패 및 매출 손실",
+    "prevention_measures": [
+      "인증서 만료 자동 알림",
+      "보안 인증 로직 테스트 강화",
+      "결제 시스템 모니터링 강화",
+      "대체 결제 수단 준비"
+    ],
+    "related_components": ["결제게이트웨이", "인증서버", "보안모듈", "주문시스템"],
+    "business_impact": "결제 실패 5000건, 매출 손실 2억원, 고객 불만 5000건"
+  },
+  {
+    "id": "INC-2024-020",
+    "title": "배송 추적 정보 미업데이트",
+    "description": "배송 상태 정보가 업데이트되지 않아 고객이 배송 상태를 확인할 수 없는 문제가 발생했습니다. 특히 배송사 API 연동 오류로 발생했습니다.",
+    "system": "배송관리시스템",
+    "severity": "Medium",
+    "status": "Resolved",
+    "reported_date": "2024-04-05",
+    "resolved_date": "2024-04-06",
+    "duration_minutes": 180,
+    "affected_users": 4000,
+    "root_cause": "배송사 API 서버 장애 및 연동 오류",
+    "resolution": "배송사 API 연동 복구 및 대체 API 엔드포인트 사용",
+    "impact": "배송 추적 불가로 인한 고객 불만",
+    "prevention_measures": [
+      "다중 배송사 API 엔드포인트 준비",
+      "API 연동 모니터링 강화",
+      "대체 추적 시스템 구축",
+      "정기적인 API 연동 테스트"
+    ],
+    "related_components": ["배송DB", "배송사API", "추적시스템", "고객포털"],
+    "business_impact": "고객 불만 2000건, 배송 문의 증가로 인한 CS 부하"
   }
 ]

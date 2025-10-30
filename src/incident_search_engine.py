@@ -36,8 +36,14 @@ class IncidentSearchEngine:
                 self.config.AZURE_SEARCH_KEY and
                 self.config.AZURE_SEARCH_KEY != "your-search-key")
         
-    def search_related(self, query_sr: Dict[str, Any], top_k: int = 5) -> List[Dict[str, Any]]:
-        """관련 장애 검색 (Azure AI Search 사용)"""
+    def search_related(self, query_sr: Dict[str, Any], top_k: int = 5, use_semantic: bool = True) -> List[Dict[str, Any]]:
+        """관련 장애 검색 (Azure AI Search 사용, 노트북 스타일)
+        
+        Args:
+            query_sr: 검색할 SR 객체
+            top_k: 반환할 최대 결과 수
+            use_semantic: True면 semantic 검색 사용 (README의 "semantic" 방식), False면 simple 검색
+        """
         # 쿼리 텍스트 생성
         query_text = self._build_incident_query(query_sr)
         
@@ -46,11 +52,12 @@ class IncidentSearchEngine:
             'system': query_sr.get('system')
         }
         
-        # Azure Search로 검색
+        # Azure Search로 검색 (노트북 스타일: semantic 검색 지원)
         results = self.azure_client.search_related_incidents(
             query_text=query_text,
             top_k=top_k,
-            filters=filters
+            filters=filters,
+            use_semantic=use_semantic  # semantic 검색 사용 여부
         )
         
         # 추가 정보 채우기

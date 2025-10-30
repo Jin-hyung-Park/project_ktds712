@@ -19,11 +19,21 @@ class Config:
     AZURE_SEARCH_INDEX_SR = "sr-index"
     AZURE_SEARCH_INDEX_INCIDENT = "incident-index"
     
-    # Azure OpenAI 설정
+    # Azure OpenAI 설정 (텍스트 생성용)
     AZURE_OPENAI_ENDPOINT = os.getenv("AZURE_OPENAI_ENDPOINT", "https://your-openai-service.openai.azure.com")
     AZURE_OPENAI_KEY = os.getenv("AZURE_OPENAI_KEY", "your-openai-key")
     AZURE_OPENAI_DEPLOYMENT = os.getenv("AZURE_OPENAI_DEPLOYMENT", "gpt-4")
     
+    # Azure OpenAI 설정 (텍스트 생성용 - 별도 리소스)
+    AZURE_TEXT_OPENAI_ENDPOINT = os.getenv("AZURE_TEXT_OPENAI_ENDPOINT", "https://your-openai-service.openai.azure.com")
+    AZURE_TEXT_OPENAI_KEY = os.getenv("AZURE_TEXT_OPENAI_KEY", "your-openai-key")
+    AZURE_TEXT_OPENAI_DEPLOYMENT = os.getenv("AZURE_TEXT_OPENAI_DEPLOYMENT", "gpt-4")
+    
+    # Azure OpenAI 설정 (임베딩용 - 별도 리소스)
+    AZURE_EMBEDDING_OPENAI_ENDPOINT = os.getenv("AZURE_EMBEDDING_OPENAI_ENDPOINT", "https://your-embedding-service.openai.azure.com")
+    AZURE_EMBEDDING_OPENAI_KEY = os.getenv("AZURE_EMBEDDING_OPENAI_KEY", "your-embedding-key")
+    AZURE_EMBEDDING_OPENAI_DEPLOYMENT = os.getenv("AZURE_EMBEDDING_OPENAI_DEPLOYMENT", "text-embedding-3-small")
+
     # 리스크 계산 가중치
     RISK_WEIGHTS = {
         "sr_similarity": 0.25,

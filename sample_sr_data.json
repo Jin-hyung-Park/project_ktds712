@@ -188,5 +188,119 @@
       "성능 테스트 자동화"
     ],
     "affected_components": ["요금DB", "청구DB", "요금계산엔진", "모니터링"]
+  },
+  {
+    "id": "SR-2024-011",
+    "title": "고객 정보 검색 성능 개선",
+    "description": "고객 정보 검색 시 응답 시간이 길어져 사용자 불만이 발생하고 있습니다. 특히 고객 수가 증가하면서 검색 성능이 저하되고 있습니다.",
+    "system": "고객관리시스템",
+    "priority": "High",
+    "category": "성능개선",
+    "requester": "고객관리팀",
+    "created_date": "2024-03-05",
+    "target_date": "2024-03-20",
+    "business_impact": "고객 서비스 응답 지연으로 인한 고객 불만",
+    "technical_requirements": [
+      "고객 정보 검색 인덱스 최적화",
+      "검색 알고리즘 개선",
+      "캐싱 전략 도입",
+      "데이터베이스 쿼리 최적화"
+    ],
+    "affected_components": ["고객DB", "검색엔진", "캐시서버", "API서버"]
+  },
+  {
+    "id": "SR-2024-012",
+    "title": "고객 이력 조회 시스템 구축",
+    "description": "고객의 상담 이력, 주문 이력, 결제 이력을 통합 조회할 수 있는 시스템이 필요합니다. 현재는 각 시스템을 따로 조회하여 시간이 오래 걸립니다.",
+    "system": "고객관리시스템",
+    "priority": "Medium",
+    "category": "신규기능",
+    "requester": "CS팀",
+    "created_date": "2024-03-10",
+    "target_date": "2024-04-15",
+    "business_impact": "고객 서비스 효율성 향상, 응답 시간 단축",
+    "technical_requirements": [
+      "통합 이력 조회 API 개발",
+      "데이터 연동 구축",
+      "대시보드 개발",
+      "검색 기능 구현"
+    ],
+    "affected_components": ["고객DB", "상담시스템", "주문시스템", "결제시스템"]
+  },
+  {
+    "id": "SR-2024-013",
+    "title": "주문 처리 시스템 성능 최적화",
+    "description": "주문 처리 시 처리 시간이 길어져 주문 승인이 지연되는 문제가 발생하고 있습니다. 특히 대량 주문 처리 시 성능 저하가 심각합니다.",
+    "system": "주문처리시스템",
+    "priority": "Critical",
+    "category": "성능개선",
+    "requester": "주문팀",
+    "created_date": "2024-03-15",
+    "target_date": "2024-03-30",
+    "business_impact": "주문 처리 지연으로 인한 고객 이탈 및 매출 손실",
+    "technical_requirements": [
+      "주문 처리 로직 최적화",
+      "비동기 처리 도입",
+      "배치 처리 성능 개선",
+      "데이터베이스 성능 튜닝"
+    ],
+    "affected_components": ["주문엔진", "주문DB", "결제게이트웨이", "재고시스템"]
+  },
+  {
+    "id": "SR-2024-014",
+    "title": "재고 실시간 동기화 시스템 구축",
+    "description": "재고 정보가 실시간으로 반영되지 않아 주문 시 재고 부족 오류가 발생하는 경우가 있습니다. 각 시스템 간 재고 동기화가 필요합니다.",
+    "system": "재고관리시스템",
+    "priority": "High",
+    "category": "인프라개선",
+    "requester": "재고팀",
+    "created_date": "2024-03-20",
+    "target_date": "2024-04-30",
+    "business_impact": "재고 정보 부정확으로 인한 주문 오류 및 고객 불만",
+    "technical_requirements": [
+      "실시간 재고 동기화 메커니즘 구축",
+      "이벤트 기반 아키텍처 도입",
+      "재고 충돌 해결 로직",
+      "동기화 모니터링 시스템"
+    ],
+    "affected_components": ["재고DB", "주문시스템", "물류시스템", "매장시스템"]
+  },
+  {
+    "id": "SR-2024-015",
+    "title": "결제 시스템 보안 강화",
+    "description": "결제 시 보안 인증 과정이 불안정하여 결제 실패가 발생하는 경우가 있습니다. 보안 인증 로직을 개선하고 이중 인증을 도입해야 합니다.",
+    "system": "결제시스템",
+    "priority": "Critical",
+    "category": "보안개선",
+    "requester": "결제팀",
+    "created_date": "2024-03-25",
+    "target_date": "2024-04-20",
+    "business_impact": "결제 실패로 인한 주문 실패 및 매출 손실",
+    "technical_requirements": [
+      "이중 인증 시스템 구축",
+      "결제 토큰 암호화 강화",
+      "보안 로그 강화",
+      "침입 탐지 시스템 연동"
+    ],
+    "affected_components": ["결제게이트웨이", "인증서버", "보안모듈", "로그시스템"]
+  },
+  {
+    "id": "SR-2024-016",
+    "title": "배송 추적 시스템 개선",
+    "description": "배송 상태 조회 시 정보가 업데이트되지 않거나 지연되는 문제가 있습니다. 실시간 배송 추적이 가능하도록 개선이 필요합니다.",
+    "system": "배송관리시스템",
+    "priority": "Medium",
+    "category": "개선",
+    "requester": "물류팀",
+    "created_date": "2024-04-01",
+    "target_date": "2024-04-30",
+    "business_impact": "배송 정보 조회 지연으로 인한 고객 불만",
+    "technical_requirements": [
+      "실시간 배송 정보 업데이트",
+      "배송사 API 연동 강화",
+      "배송 추적 UI 개선",
+      "알림 시스템 구축"
+    ],
+    "affected_components": ["배송DB", "배송사API", "알림서버", "고객포털"]
   }
 ]
