@@ -31,7 +31,16 @@ az webapp config set \
 # Create ZIP package
 ZIP_NAME="app.zip"
 rm -f "$ZIP_NAME"
-zip -r "$ZIP_NAME" . -x "*.git*" "*.DS_Store*" "__pycache__/*" "*.pyc"
+# 불필요/대용량 디렉터리 제외(.venv, 캐시 등)
+zip -r "$ZIP_NAME" . \
+  -x "*.git*" \
+     "*.DS_Store*" \
+     "**/__pycache__/**" \
+     "*.pyc" \
+     "**/.venv/**" \
+     ".venv/**" \
+     "src/.venv/**" \
+     "**/.ipynb_checkpoints/**"
 
 # Deploy ZIP to the slot
 az webapp deployment source config-zip \

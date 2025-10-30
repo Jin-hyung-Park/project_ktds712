@@ -67,6 +67,34 @@ class SRRAGSearch:
         except Exception as e:
             raise RuntimeError(f"OpenAI 클라이언트 초기화 실패: {e}")
     
+    def _build_search_query(self, user_query: str) -> str:
+        """LLM을 사용해 인덱스 친화적인 검색 쿼리로 정제
+
+        목적/요청 상세 등 자연어 입력을 Azure Cognitive Search에 적합한 키워드/구문으로 축약
+        실패 시 원본 쿼리를 그대로 반환
+        """
+        try:
+            system_prompt = (
+                "너는 Azure AI Search용 쿼리 빌더다. 입력 텍스트에서 핵심 키워드와 \n"
+                "필드 연관 단어를 뽑아 검색 효율이 높은 간결한 쿼리를 만들어라. \n"
+                "불필요한 문장은 제거하고, 핵심 명사구/기술용어/시스템명/카테고리/우선순위/\n"
+                "기술요구사항/영향 컴포넌트를 중심으로 10~25단어 이내 한국어 키워드 열로 구성해라. \n"
+                "따옴표나 마크다운 없이 평문으로만 출력해라."
+            )
+            completion = self.openai_client.chat.completions.create(
+                model=self.config.AZURE_OPENAI_DEPLOYMENT,
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_query},
+                ],
+                temperature=0.2,
+            )
+            refined = (completion.choices[0].message.content or "").strip()
+            # 너무 짧게 오면 원본 유지
+            return refined if len(refined.split()) >= 3 else user_query
+        except Exception:
+            return user_query
+    
     def _format_document(self, document: Dict[str, Any]) -> str:
         """문서를 포맷팅하여 문자열로 변환"""
         tech_reqs = document.get('technical_requirements', [])
@@ -102,7 +130,8 @@ class SRRAGSearch:
                            top_k: int = 5,
                            fields: Optional[List[str]] = None,
                            use_llm: bool = True,
-                           custom_prompt: Optional[str] = None) -> Dict[str, Any]:
+                           custom_prompt: Optional[str] = None,
+                           use_query_builder: bool = True) -> Dict[str, Any]:
         """
         연관 SR 검색 및 추천
         
@@ -131,6 +160,14 @@ class SRRAGSearch:
         select_fields = ", ".join(fields)
         
         try:
+            # 쿼리 빌더로 인덱스 친화적 쿼리 생성
+            original_query = query
+            if use_query_builder:
+                query = self._build_search_query(query)
+                try:
+                    print(f"🔧 SR 쿼리 빌더 적용: '{original_query[:60]}...' => '{query[:120]}'")
+                except Exception:
+                    pass
             # Azure Search로 검색
             search_results = self.search_client.search(
                 search_text=query,
@@ -171,7 +208,8 @@ class SRRAGSearch:
                                     sources=sources_formatted
                                 ),
                             },
-                        ]
+                        ],
+                        temperature=0.2
                     )
                     
                     result["llm_response"] = llm_response.choices[0].message.content
@@ -219,7 +257,25 @@ def search_related_srs(query: str,
 
 # 메인 실행 부분
 if __name__ == "__main__":
-    query = "가입일 기준 월할 계산 기능 개발 연관된 SR을 검색해주세요."
+    query = """    신규 결제 시스템 개발 - 실시간 결제 처리 및 다중 결제 수단 지원
+    
+    기존 결제 시스템의 성능 문제와 다중 결제 수단 지원 부족을 해결하기 위해 
+    새로운 결제 시스템을 개발합니다.
+
+    주요 요구사항:
+    1. 실시간 결제 처리 (응답 시간 < 3초)
+    2. 신용카드, 계좌이체, 간편결제 지원
+    3. 결제 실패 시 자동 재시도 메커니즘
+    4. 결제 내역 실시간 조회 및 알림
+    5. PCI DSS 보안 규정 준수
+    6. 99.9% 가용성 보장
+
+    기술 스택:
+    - Backend: Node.js + Express
+    - Database: PostgreSQL + Redis
+    - Payment Gateway: 토스페이먼츠, KG모빌리언스
+    - Monitoring: Prometheus + Grafana
+    """
     
     try:
         # 함수로 검색 실행

@@ -62,8 +62,22 @@ class IntegratedRiskAnalyzer:
             sr_result = search_related_srs(
                 query=development_task,
                 top_k=sr_top_k,
-                use_llm=False  # 원본 데이터만 필요
+                use_llm=False,  # 원본 데이터만 필요
+                # 인덱스 친화적 쿼리 빌더 활성화
+                
             )
+            # 서버 로그에 SR 검색 결과 요약 출력
+            try:
+                sr_docs = sr_result.get("documents", [])
+                print(f"📄 SR 검색 결과: total={sr_result.get('total_count', 0)}, 반환={len(sr_docs)}")
+                for i, doc in enumerate(sr_docs[:min(5, sr_top_k)], 1):
+                    sr_id = doc.get('id') or doc.get('SR_ID') or 'N/A'
+                    title = doc.get('title', 'N/A')
+                    system = doc.get('system', 'N/A')
+                    priority = doc.get('priority', 'N/A')
+                    print(f"  {i}. [{sr_id}] {title} | 시스템:{system} | 우선순위:{priority}")
+            except Exception as _:
+                pass
             
             # 2. 유사 장애 검색
             print("🔍 유사 장애 검색 중...")
@@ -73,6 +87,17 @@ class IntegratedRiskAnalyzer:
                 search_mode="hybrid",
                 use_llm=False  # 원본 데이터만 필요
             )
+            # 서버 로그에 장애 검색 결과 요약 출력
+            try:
+                inc_docs = incident_result.get("documents", [])
+                print(f"🚨 장애 검색 결과: total={incident_result.get('total_count', 0)}, 반환={len(inc_docs)}, 모드={incident_result.get('search_mode', 'text')}")
+                for i, doc in enumerate(inc_docs[:min(5, incident_top_k)], 1):
+                    parent_id = doc.get('parent_id', 'N/A')
+                    title = doc.get('title', 'N/A')
+                    chunk_id = doc.get('chunk_id', 'N/A')
+                    print(f"  {i}. [{parent_id}#{chunk_id}] {title}")
+            except Exception as _:
+                pass
             
             # 3. 데이터 통합
             integrated_data = {
@@ -227,7 +252,7 @@ class IntegratedRiskAnalyzer:
                         "content": fmea_prompt
                     },
                 ],
-                temperature=0.3  # 일관된 분석을 위해 낮은 temperature 사용
+                temperature=0.2  # 결정성 강화
             )
             
             # JSON 응답 파싱 시도

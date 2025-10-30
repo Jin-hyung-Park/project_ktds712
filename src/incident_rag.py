@@ -78,6 +78,32 @@ class IncidentRAGSearch:
         except Exception as e:
             raise RuntimeError(f"OpenAI 클라이언트 초기화 실패: {e}")
     
+    def _build_search_query(self, user_query: str) -> str:
+        """LLM을 사용해 장애 인덱스 친화적인 검색 쿼리로 정제
+
+        입력 텍스트에서 장애 원인/영향/해결 키워드와 시스템/컴포넌트/심각도 등의 핵심을 추출하여
+        Azure Cognitive Search에 적합한 간결한 쿼리로 축약한다. 실패 시 원본을 반환한다.
+        """
+        try:
+            system_prompt = (
+                "너는 장애 문서(RAG)용 Azure Cognitive Search 쿼리 빌더다. 입력 텍스트에서 \n"
+                "장애 제목/원인/영향/해결/예방/시스템/컴포넌트/심각도/시간 관련 핵심 키워드를 추출하여 \n"
+                "검색 효율이 높은 10~25단어 이내 한국어 키워드 열로 간결히 작성하라. \n"
+                "불필요한 문장과 접속사는 제거하고, 평문으로만 출력하라."
+            )
+            completion = self.openai_client.chat.completions.create(
+                model=self.config.AZURE_OPENAI_DEPLOYMENT,
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_query},
+                ],
+                temperature=0.2,
+            )
+            refined = (completion.choices[0].message.content or "").strip()
+            return refined if len(refined.split()) >= 3 else user_query
+        except Exception:
+            return user_query
+    
     def _format_incident_document(self, document: Dict[str, Any]) -> str:
         """장애 문서를 포맷팅하여 문자열로 변환"""
         return (
@@ -93,7 +119,8 @@ class IncidentRAGSearch:
                                 top_k: int = 5,
                                 use_llm: bool = True,
                                 custom_prompt: Optional[str] = None,
-                                search_mode: str = "hybrid") -> Dict[str, Any]:
+                                search_mode: str = "hybrid",
+                                use_query_builder: bool = True) -> Dict[str, Any]:
         """
         연관 장애 검색 및 분석
         
@@ -112,6 +139,15 @@ class IncidentRAGSearch:
                 - sources_formatted: 포맷팅된 소스 문자열
         """
         try:
+            # 쿼리 빌더 적용
+            original_query = query
+            if use_query_builder:
+                query = self._build_search_query(query)
+                try:
+                    print(f"🔧 INC 쿼리 빌더 적용: '{original_query[:60]}...' => '{query[:120]}'")
+                except Exception:
+                    pass
+
             # 검색 모드에 따른 파라미터 설정
             search_params = {
                 "search_text": query,
@@ -197,7 +233,8 @@ class IncidentRAGSearch:
                                     sources=sources_formatted
                                 ),
                             },
-                        ]
+                        ],
+                        temperature=0.2
                     )
                     
                     result["llm_response"] = llm_response.choices[0].message.content
