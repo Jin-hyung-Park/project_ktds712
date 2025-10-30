@@ -279,16 +279,35 @@ class IntegratedRiskAnalyzer:
         report.append("🔍 FMEA 기반 개발 리스크 분석 보고서")
         report.append("=" * 80)
         
-        # 요약 정보
-        if "summary" in analysis_result:
-            summary = analysis_result["summary"]
-            report.append(f"\n📊 위험도 요약")
-            report.append("-" * 40)
-            report.append(f"총 위험 요소: {summary.get('total_risks', 'N/A')}개")
-            report.append(f"고위험 요소: {summary.get('high_risk_count', 'N/A')}개 (RPN > 100)")
-            report.append(f"중위험 요소: {summary.get('medium_risk_count', 'N/A')}개 (RPN 50-100)")
-            report.append(f"저위험 요소: {summary.get('low_risk_count', 'N/A')}개 (RPN < 50)")
-            report.append(f"전체 위험도: {summary.get('overall_risk_score', 'N/A')}/10")
+        # 요약 정보 (불일치 시 재계산하여 총합 일치 보정)
+        risk_factors = analysis_result.get("risk_factors", []) or []
+        try:
+            rpn_values = [int(r.get("rpn", 0)) for r in risk_factors if r.get("rpn") is not None]
+        except Exception:
+            rpn_values = [r.get("rpn", 0) for r in risk_factors]
+        high_count = sum(1 for v in rpn_values if v > 100)
+        medium_count = sum(1 for v in rpn_values if 50 <= v <= 100)
+        low_count = sum(1 for v in rpn_values if v < 50)
+        total_count = len(risk_factors)
+
+        # summary 보정/생성
+        summary = analysis_result.get("summary", {}) or {}
+        # 항상 재계산 값으로 일치시키기(총합 보장)
+        summary["total_risks"] = total_count
+        summary["high_risk_count"] = high_count
+        summary["medium_risk_count"] = medium_count
+        summary["low_risk_count"] = low_count
+        if "overall_risk_score" not in summary:
+            summary["overall_risk_score"] = "N/A"
+
+        # 표시
+        report.append(f"\n📊 위험도 요약")
+        report.append("-" * 40)
+        report.append(f"총 위험 요소: {summary.get('total_risks', 'N/A')}개")
+        report.append(f"고위험 요소: {summary.get('high_risk_count', 'N/A')}개 (RPN > 100)")
+        report.append(f"중위험 요소: {summary.get('medium_risk_count', 'N/A')}개 (RPN 50-100)")
+        report.append(f"저위험 요소: {summary.get('low_risk_count', 'N/A')}개 (RPN < 50)")
+        report.append(f"전체 위험도: {summary.get('overall_risk_score', 'N/A')}/10")
 
         # 참조 SR 요약
         if sr_documents is not None and len(sr_documents) > 0:

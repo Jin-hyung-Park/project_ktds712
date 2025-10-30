@@ -134,7 +134,7 @@ def main():
             )
         
         with col2:
-            st.markdown("###요청 상세 내용")
+            st.markdown("### 요청 상세 내용")
             description = st.text_area(
                 "요청 상세 내용",
                 placeholder="개발하고자 하는 기능의 상세한 내용을 입력하세요...",
